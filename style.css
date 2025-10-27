@@ -1,0 +1,219 @@
+:root {
+    --bg-color: #1a1a2e;
+    --panel-bg: rgba(31, 40, 62, 0.7);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0c0;
+    
+    --primary-color: #00f5c3;
+    --primary-hover: #00d1a7;
+    --danger-color: #e94560;
+    --danger-hover: #c43a51;
+    --info-color: #f39c12;
+    --info-hover: #d1860d;
+
+    --log-bg: rgba(0, 0, 0, 0.3);
+    --log-info: #999;
+    --log-place: #00f5c3;
+    --log-remove: #f39c12;
+    --log-conflict: #e94560;
+    --log-solution: #33ff99;
+
+    --light-cell: #4a4e69;
+    --dark-cell: #2c2f3b;
+    --queen-color: #00f5c3;
+    --trying-color: #f39c12;
+    --checking-color: rgba(233, 69, 96, 0.5);
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    flex-direction: row; /* Main change: 3-column layout */
+    width: 100%;
+    max-width: 1800px; /* Increased max width */
+    height: 95vh;
+    max-height: 900px;
+    background: var(--panel-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px var(--shadow-color);
+    overflow: hidden;
+}
+
+/* --- Left Panel: Controls --- */
+.control-panel {
+    width: 350px; /* Fixed width */
+    flex-shrink: 0;
+    padding: 24px 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    border-right: 1px solid var(--border-color);
+}
+/* (All other control-panel styles remain the same) */
+
+/* --- Center Panel: Board --- */
+.main-content {
+    flex-grow: 1; /* Takes up remaining space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#board-container {
+    display: grid;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 10px 40px var(--shadow-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* --- Right Panel: Logs --- */
+.right-panel {
+    width: 370px; /* Fixed width */
+    flex-shrink: 0;
+    padding: 24px 32px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* Stack solutions on top of log */
+    gap: 20px;
+    overflow-y: auto;
+    border-left: 1px solid var(--border-color);
+}
+
+/* --- Solutions Panel (New) --- */
+.solutions-panel {
+    flex-shrink: 0; /* Don't shrink */
+    max-height: 40%; /* Take up to 40% of right panel */
+    display: flex;
+    flex-direction: column;
+}
+
+.solutions-panel strong {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+#solutions-container {
+    flex-grow: 1;
+    background: var(--log-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+#solutions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.solution-entry {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    padding: 5px;
+    color: var(--log-solution);
+    border-bottom: 1px dashed #444;
+}
+.solution-entry strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* --- Log Panel (Moved) --- */
+.log-panel {
+    flex-grow: 1; /* Take remaining space in right panel */
+    display: flex;
+    flex-direction: column;
+    min-height: 150px; /* Ensure it has some height */
+}
+
+.log-panel strong {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+#log-container {
+    flex-grow: 1;
+    background: var(--log-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+#log-list { list-style: none; padding: 0; margin: 0; }
+#log-list li {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    padding: 4px 2px;
+    border-bottom: 1px dashed #333;
+}
+#log-list li:last-child { border-bottom: none; }
+
+.log-info { color: var(--log-info); }
+.log-place { color: var(--log-place); font-weight: 600; }
+.log-remove { color: var(--log-remove); }
+.log-conflict { color: var(--log-conflict); }
+.log-solution { color: var(--log-solution); font-weight: 700; font-size: 0.9rem; }
+
+
+/* (All other styles for buttons, inputs, cells, etc. remain the same) */
+/* --- Control Panel --- */
+.control-panel h2 { margin: 0; font-size: 1.8rem; color: var(--text-primary); text-align: center; }
+.control-panel p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; text-align: center; margin-top: -10px; }
+.control-group { display: flex; flex-direction: column; gap: 8px; }
+.control-group label { font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); }
+input[type="number"], input[type="range"] { width: 100%; box-sizing: border-box; }
+input[type="number"] { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: rgba(0, 0, 0, 0.2); color: var(--text-primary); font-size: 1rem; }
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 8px; background: rgba(0, 0, 0, 0.3); border-radius: 5px; outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; cursor: pointer; }
+.button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+button { padding: 12px; font-size: 0.9rem; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); }
+button:disabled { background-color: #555; color: #999; cursor: not-allowed; box-shadow: none; }
+.primary-btn { background-color: var(--primary-color); color: #000; }
+.primary-btn:hover:not(:disabled) { background-color: var(--primary-hover); }
+.danger-btn { background-color: var(--danger-color); color: var(--text-primary); }
+.danger-btn:hover:not(:disabled) { background-color: var(--danger-hover); }
+.info-btn { background-color: var(--info-color); color: var(--text-primary); }
+.info-btn:hover:not(:disabled) { background-color: var(--info-hover); }
+#reset-btn { background-color: #555; color: var(--text-primary); }
+#reset-btn:hover { background-color: #666; }
+.status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.status-box { background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; text-align: center; }
+.status-box strong { display: block; margin-bottom: 4px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
+#status-message { font-weight: 600; color: var(--primary-color); }
+#solution-count { font-size: 1.5rem; font-weight: 700; }
+/* --- Cell Styles --- */
+.cell { --cell-size: 50px; width: var(--cell-size); height: var(--cell-size); display: flex; justify-content: center; align-items: center; font-size: calc(var(--cell-size) * 0.7); box-sizing: border-box; position: relative; transition: background-color 0.1s ease-out; }
+.cell.light { background-color: var(--light-cell); }
+.cell.dark { background-color: var(--dark-cell); }
+.cell.queen { color: var(--queen-color); text-shadow: 0 0 10px var(--queen-color); }
+.cell.trying { background-color: var(--trying-color) !important; }
+.cell.checking { background-color: var(--checking-color) !important; }
