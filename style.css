@@ -33,7 +33,8 @@ body {
     color: var(--text-primary);
     margin: 0;
     height: 100vh;
-    overflow: hidden;
+    
+    overflow: auto;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -43,9 +44,9 @@ body {
 
 .container {
     display: flex;
-    flex-direction: row; /* Main change: 3-column layout */
+    flex-direction: row;
     width: 100%;
-    max-width: 1800px; /* Increased max width */
+    max-width: 1800px;
     height: 95vh;
     max-height: 900px;
     background: var(--panel-bg);
@@ -59,7 +60,7 @@ body {
 
 /* --- Left Panel: Controls --- */
 .control-panel {
-    width: 350px; /* Fixed width */
+    width: 350px;
     flex-shrink: 0;
     padding: 24px 32px;
     box-sizing: border-box;
@@ -69,11 +70,10 @@ body {
     overflow-y: auto;
     border-right: 1px solid var(--border-color);
 }
-/* (All other control-panel styles remain the same) */
 
 /* --- Center Panel: Board --- */
 .main-content {
-    flex-grow: 1; /* Takes up remaining space */
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -82,31 +82,38 @@ body {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
+
 #board-container {
     display: grid;
     border: 2px solid var(--border-color);
     box-shadow: 0 10px 40px var(--shadow-color);
     border-radius: 8px;
     overflow: hidden;
+
+    width: 100%;
+    max-width: 800px;
+    margin: auto; /* Center it */
+    height: auto;
+    aspect-ratio: 1 / 1;
 }
 
 /* --- Right Panel: Logs --- */
 .right-panel {
-    width: 370px; /* Fixed width */
+    width: 370px;
     flex-shrink: 0;
     padding: 24px 32px;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column; /* Stack solutions on top of log */
+    flex-direction: column;
     gap: 20px;
     overflow-y: auto;
     border-left: 1px solid var(--border-color);
 }
 
-/* --- Solutions Panel (New) --- */
+/* --- Solutions Panel --- */
 .solutions-panel {
-    flex-shrink: 0; /* Don't shrink */
-    max-height: 40%; /* Take up to 40% of right panel */
+    flex-shrink: 0;
+    max-height: 40%;
     display: flex;
     flex-direction: column;
 }
@@ -144,12 +151,12 @@ body {
     font-weight: 600;
 }
 
-/* --- Log Panel (Moved) --- */
+/* --- Log Panel --- */
 .log-panel {
-    flex-grow: 1; /* Take remaining space in right panel */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-height: 150px; /* Ensure it has some height */
+    min-height: 150px;
 }
 
 .log-panel strong {
@@ -183,8 +190,39 @@ body {
 .log-solution { color: var(--log-solution); font-weight: 700; font-size: 0.9rem; }
 
 
-/* (All other styles for buttons, inputs, cells, etc. remain the same) */
-/* --- Control Panel --- */
+.cell {
+
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    font-size: 70%; 
+    
+    box-sizing: border-box;
+    position: relative;
+    transition: background-color 0.1s ease-out;
+}
+.cell.light { background-color: var(--light-cell); }
+.cell.dark { background-color: var(--dark-cell); }
+
+.cell.queen {
+    color: var(--queen-color);
+    text-shadow: 0 0 10px var(--queen-color);
+
+    font-size: 90%;
+    font-weight: 600;
+}
+
+
+.cell.trying { background-color: var(--trying-color) !important; }
+.cell.checking { background-color: var(--checking-color) !important; }
+
+
+/* --- Control Panel Elements --- */
 .control-panel h2 { margin: 0; font-size: 1.8rem; color: var(--text-primary); text-align: center; }
 .control-panel p { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; text-align: center; margin-top: -10px; }
 .control-group { display: flex; flex-direction: column; gap: 8px; }
@@ -210,10 +248,83 @@ button:disabled { background-color: #555; color: #999; cursor: not-allowed; box-
 .status-box strong { display: block; margin-bottom: 4px; font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
 #status-message { font-weight: 600; color: var(--primary-color); }
 #solution-count { font-size: 1.5rem; font-weight: 700; }
-/* --- Cell Styles --- */
-.cell { --cell-size: 50px; width: var(--cell-size); height: var(--cell-size); display: flex; justify-content: center; align-items: center; font-size: calc(var(--cell-size) * 0.7); box-sizing: border-box; position: relative; transition: background-color 0.1s ease-out; }
-.cell.light { background-color: var(--light-cell); }
-.cell.dark { background-color: var(--dark-cell); }
-.cell.queen { color: var(--queen-color); text-shadow: 0 0 10px var(--queen-color); }
-.cell.trying { background-color: var(--trying-color) !important; }
-.cell.checking { background-color: var(--checking-color) !important; }
+
+
+/* --- Tablet View and small laptops --- */
+@media (max-width: 1100px) {
+    body {
+        height: auto; /* Allow scrolling */
+        padding: 0;
+    }
+
+    .container {
+        flex-direction: column; /* Stack all 3 panels vertically */
+        height: auto;
+        min-height: 100vh;
+        max-height: none;
+        border-radius: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .control-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 24px; /* Uniform padding */
+        overflow-y: visible;
+    }
+
+    .main-content {
+        padding: 24px;
+        order: 2; /* Move board below controls */
+    }
+
+    .right-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-color);
+        padding: 24px; /* Uniform padding */
+        overflow-y: visible;
+        order: 3; /* Move logs to the bottom */
+        
+        /* Give logs a fixed height for better scrolling */
+        max-height: 60vh;
+    }
+
+    .solutions-panel {
+        max-height: 250px; /* Constrain solution box height */
+    }
+}
+
+
+/* --- Mobile View --- */
+@media (max-width: 768px) {
+    .control-panel,
+    .main-content,
+    .right-panel {
+        padding: 16px;
+    }
+
+    .control-panel h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Stack buttons for easier tapping */
+    .button-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Make the log panel taller on mobile for easier reading */
+    .right-panel {
+        max-height: 80vh;
+    }
+
+    .solutions-panel {
+        max-height: 200px;
+    }
+}

@@ -111,18 +111,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Board Creation and Drawing ---
     
     function createBoard() {
+        // 'n' is already set by the reset() function
         board = Array(n).fill(0).map(() => Array(n).fill(0));
         boardContainer.innerHTML = '';
+        
+        // This is the ONLY layout logic JavaScript needs to do.
+        // CSS handles all the sizing (width, height, aspect-ratio).
         boardContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
 
-        const boardSize = Math.min(
-            boardContainer.clientWidth, 
-            boardContainer.clientHeight, 
-            window.innerHeight * 0.8
-        );
-        const cellSize = Math.max(Math.floor(boardSize / n) - 2, 20);
-        boardContainer.style.setProperty('--cell-size', `${cellSize}px`);
-
+        // --- All the complex 'cellSize' JS logic is GONE! ---
+        
+        // Create the cell elements
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < n; j++) {
                 const cell = document.createElement('div');
