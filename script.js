@@ -25,10 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let solutionCount = 0;
 
     // --- OPTIMIZATION: Constraint Arrays ---
-    // These arrays will store our constraints for O(1) lookups
-    let cols;    // Tracks occupied columns
-    let diag1;   // Tracks occupied main diagonals (row + col)
-    let diag2;   // Tracks occupied anti-diagonals (row - col)
+    let cols;
+    let diag1;
+    let diag2;
 
 
     // --- Helper Functions ---
@@ -55,12 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
                 if (board[r][c] === 1) {
-                    solution.push(c); // Save the column index for row r
+                    solution.push(c);
                     break;
                 }
             }
         }
-
         const li = document.createElement('li');
         li.classList.add('solution-entry');
         li.innerHTML = `<strong>Solution ${solutionCount}:</strong> [${solution.join(', ')}]`;
@@ -69,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Control Functions (Updated) ---
+    // --- Control Functions ---
     
     function startSolving() {
         isSolving = true;
@@ -98,24 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function reset() {
         stopSolvingProcess();
         n = parseInt(nInput.value, 10);
-        createBoard(n);
+        createBoard();
         statusMsg.textContent = 'Idle';
         solutionCount = 0;
         solutionCountDisplay.textContent = '0';
         logList.innerHTML = '';
         solutionsList.innerHTML = '';
 
-        // --- OPTIMIZATION: Initialize constraint arrays ---
-        // We need 2*n-1 because that's the number of unique diagonals
         cols = new Array(n).fill(false);
         diag1 = new Array(2 * n - 1).fill(false);
         diag2 = new Array(2 * n - 1).fill(false);
     }
 
     // --- Board Creation and Drawing ---
-
-    function createBoard(size) {
-        n = size;
+    
+    function createBoard() {
         board = Array(n).fill(0).map(() => Array(n).fill(0));
         boardContainer.innerHTML = '';
         boardContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
@@ -156,117 +151,114 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- N-Queens CSP Logic (OPTIMIZED) ---
-    // The slow O(N) isSafe() function is GONE!
+    // --- N-Queens CSP Logic (Updated) ---
 
-    /**
-     * The main async recursive backtracking function (Optimized)
-     * @param {number} row - The current row to solve
-     * @param {boolean} findAll - True to find all solutions
-     * @returns {boolean} - True if a solution is found (and !findAll)
-     */
     async function solveNQueens(row, findAll) {
         if (stopSolving) return false;
 
-        // Base case: All queens are placed
+        // --- (NEW LOGIC HERE) ---
+        // This is the base case: a solution is found
         if (row === n) {
             solutionCount++;
             solutionCountDisplay.textContent = solutionCount;
             addLog(`🎉 Solution ${solutionCount} Found!`, 'solution');
             statusMsg.textContent = `Solution ${solutionCount} found!`;
-            
-            saveSolution(board); // Save to the list
+            saveSolution(board);
+
+            // If this is the FIRST solution, AND we are in "Find All" mode
+            // AND N is large, THEN turn on skipAnimation for all future steps.
+            if (findAll && solutionCount === 1 && n >= 8) {
+                skipAnimation = true;
+                skipBtn.disabled = true;
+                addLog('--- First solution found. Skipping animation for remaining search. ---', 'info');
+            }
 
             if (findAll) {
-                if (!skipAnimation) await sleep(1000); // Pause to show solution
+                if (!skipAnimation) await sleep(1000); // Pause to show solution (only if N < 8)
                 return false; // Force backtrack to find next solution
             }
             return true; // Found one solution, stop
         }
+        // --- (END NEW LOGIC) ---
         
-        addLog(`Searching in Row ${row}...`, 'info');
+        if (!skipAnimation) addLog(`Searching in Row ${row}...`, 'info');
 
-        // Try placing a queen in each column of the current row
         for (let col = 0; col < n; col++) {
             if (stopSolving) return false;
 
-            statusMsg.textContent = `Trying [${row}, ${col}]...`;
-            addLog(`Trying Queen at (${row}, ${col})`, 'info');
-            await toggleCellState(row, col, 'trying', true);
-
-            // --- OPTIMIZED O(1) SAFETY CHECK ---
-            const d1 = row + col;
-            const d2 = row - col + (n - 1); // Offset to avoid negative indices
-
-            let conflictReason = null;
-            if (cols[col]) {
-                conflictReason = `column ${col} is occupied.`;
-            } else if (diag1[d1]) {
-                conflictReason = `diagonal (row+col) is occupied.`;
-            } else if (diag2[d2]) {
-                conflictReason = `anti-diagonal (row-col) is occupied.`;
+            if (!skipAnimation) {
+                statusMsg.textContent = `Trying [${row}, ${col}]...`;
+                addLog(`Trying Queen at (${row}, ${col})`, 'info');
+                await toggleCellState(row, col, 'trying', true);
             }
-            // --- END OF O(1) CHECK ---
 
-            if (conflictReason === null) { // If it's safe
-                addLog(`Safe. Placing Queen at (${row}, ${col}).`, 'place');
+            // O(1) Safety Check
+            const d1 = row + col;
+            const d2 = row - col + (n - 1);
+            let conflictReason = null;
+            if (cols[col]) conflictReason = `column ${col} is occupied.`;
+            else if (diag1[d1]) conflictReason = `diagonal (row+col) is occupied.`;
+            else if (diag2[d2]) conflictReason = `anti-diagonal (row-col) is occupied.`;
+
+            if (conflictReason === null) {
+                if (!skipAnimation) addLog(`Safe. Placing Queen at (${row}, ${col}).`, 'place');
                 board[row][col] = 1;
-                
-                // --- Place: UPDATE CONSTRAINTS ---
                 cols[col] = true;
                 diag1[d1] = true;
                 diag2[d2] = true;
                 
                 drawQueen(row, col, true);
-                await toggleCellState(row, col, 'trying', false);
+                if (!skipAnimation) await toggleCellState(row, col, 'trying', false);
                 
-                statusMsg.textContent = `Placed at [${row}, ${col}]. Recursing...`;
+                if (!skipAnimation) statusMsg.textContent = `Placed at [${row}, ${col}]. Recursing...`;
 
-                // Recurse to the next row
                 if (await solveNQueens(row + 1, findAll)) {
-                    return true; // Solution found and we're stopping
+                    return true;
                 }
 
-                // --- Backtrack: UNDO CONSTRAINTS ---
                 if (stopSolving) return false;
-                statusMsg.textContent = `Backtracking from [${row}, ${col}]...`;
-                addLog(`Backtracking. Removing Queen from (${row}, ${col}).`, 'remove');
+                if (!skipAnimation) {
+                    statusMsg.textContent = `Backtracking from [${row}, ${col}]...`;
+                    addLog(`Backtracking. Removing Queen from (${row}, ${col}).`, 'remove');
+                }
                 
                 board[row][col] = 0;
                 cols[col] = false;
                 diag1[d1] = false;
                 diag2[d2] = false;
-                
                 drawQueen(row, col, false);
-                await animatedSleep();
+                
+                if (!skipAnimation) await animatedSleep();
 
-            } else { // If it's not safe
-                addLog(`Conflict at (${row}, ${col}): ${conflictReason}`, 'conflict');
-                await toggleCellState(row, col, 'trying', false);
+            } else {
+                if (!skipAnimation) {
+                    addLog(`Conflict at (${row}, ${col}): ${conflictReason}`, 'conflict');
+                    await toggleCellState(row, col, 'trying', false);
+                }
             }
         }
 
-        // If no column worked in this row, backtrack
-        addLog(`No safe spot found in Row ${row}. Backtracking.`, 'remove');
+        if (!skipAnimation) addLog(`No safe spot found in Row ${row}. Backtracking.`, 'remove');
         return false;
     }
 
-    /**
-     * Main handler function to start the solving process
-     * @param {boolean} findAll - True to find all solutions
-     */
+    // --- (Updated) startSolver() ---
     async function startSolver(findAll) {
-        // --- NEW: WARNING DIALOG ---
         const nVal = parseInt(nInput.value, 10);
         if (findAll && nVal > 10) {
             if (!confirm(`Finding all solutions for N=${nVal} can take a significant amount of time (it grows exponentially).\n\nAre you sure you want to continue?`)) {
-                return; // User clicked "Cancel"
+                return;
             }
         }
 
-        reset(); // This will set the global n and init constraint arrays
+        reset(); // This sets global 'n' from the input
         startSolving();
         
+        // --- (REMOVED) ---
+        // The old auto-skip logic was here. It is now gone
+        // and has been replaced by the logic inside solveNQueens.
+        // --- (END REMOVED) ---
+
         statusMsg.textContent = findAll ? 'Finding all solutions...' : 'Finding one solution...';
         
         const foundSolution = await solveNQueens(0, findAll);
@@ -296,10 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
     skipBtn.addEventListener('click', () => {
         skipAnimation = true;
         skipBtn.disabled = true;
-        addLog('--- Animation skipped ---', 'info');
+        addLog('--- Animation skipped by user. ---', 'info');
     });
     
-    // Initial board setup and resize listener
-    reset(); // Use reset to init everything, including constraint arrays
-    window.addEventListener('resize', () => createBoard(n));
+    reset();
+    window.addEventListener('resize', () => createBoard());
 });
